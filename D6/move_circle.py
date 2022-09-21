@@ -9,7 +9,7 @@ x=400
 y=90
 C=180
 r=20
-while(C<900):
+while(1):
     clear_canvas_now()
     grass.draw_now(400,30)
     x=-math.cos(C/360*math.pi)*200+400
