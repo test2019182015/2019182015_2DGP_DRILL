@@ -1,11 +1,10 @@
 from pico2d import *
-
 def run_draw_left():
-    global y 
+    global y
     global frame
     global x
     clear_canvas()
-    KPU.draw(590,510)
+    tuk_ground.draw(TUK_WIDTH // 2, TUK_HEIGHT // 2)
     character.clip_draw(frame * 100, 0, 100, 100, x, y)
     update_canvas()
     handle_events()
@@ -15,11 +14,11 @@ def run_draw_left():
     delay(0.01)
 
 def run_draw_right():
-    global y 
+    global y
     global x
     global frame
     clear_canvas()
-    KPU.draw(590,510)
+    tuk_ground.draw(TUK_WIDTH // 2, TUK_HEIGHT // 2)
     character.clip_draw(frame * 100, 100, 100, 100, x, y)
     update_canvas()
     handle_events()
@@ -29,11 +28,11 @@ def run_draw_right():
     delay(0.01)
 
 def stay_draw_right():
-    global y 
+    global y
     global x
     global frame
     clear_canvas()
-    KPU.draw(590,510)
+    tuk_ground.draw(TUK_WIDTH // 2, TUK_HEIGHT // 2)
     character.clip_draw(frame * 100, 300, 100, 100, x, y)
     update_canvas()
     handle_events()
@@ -47,7 +46,7 @@ def stay_draw_left():
     global x
     global frame
     clear_canvas()
-    KPU.draw(590,510)
+    tuk_ground.draw(TUK_WIDTH // 2, TUK_HEIGHT // 2)
     character.clip_draw(frame * 100, 200, 100, 100, x, y)
     update_canvas()
     handle_events()
@@ -55,13 +54,13 @@ def stay_draw_left():
     frame = (frame + 1) % 8
 
     delay(0.01)
-    
+
 def run_draw_up_down_left():
     global y
     global x
     global frame
     clear_canvas()
-    KPU.draw(590,510)
+    tuk_ground.draw(TUK_WIDTH // 2, TUK_HEIGHT // 2)
     character.clip_draw(frame * 100, 0, 100, 100, x, y)
     update_canvas()
     handle_events()
@@ -75,7 +74,7 @@ def run_draw_up_down_right():
     global x
     global frame
     clear_canvas()
-    KPU.draw(590,510)
+    tuk_ground.draw(TUK_WIDTH // 2, TUK_HEIGHT // 2)
     character.clip_draw(frame * 100, 100, 100, 100, x, y)
     update_canvas()
     handle_events()
@@ -100,9 +99,13 @@ def run():
         stay_draw_right()
      if(stay_left==1):
         stay_draw_left()
-     if(run_up_down_left==1 and y>0 and y<600):
+     if(run_up_down_left==1 and y>=0 and y<=600):
         run_draw_up_down_left()
-     if(run_up_down_right==1 and y>0 and y<600):
+        if(y==0):
+            y+1
+        elif(y==600):
+            y-1
+     if(run_up_down_right==1 and y>=0 and y<=600):
         run_draw_up_down_right()
 def handle_events():
      global running
@@ -152,7 +155,7 @@ def handle_events():
                      stay_left=0
                      run_up_down_left=0
                      run_up_down_right=1
-                 
+
             elif event.key == SDLK_DOWN:
                  if(run_right==1 or stay_right==1):
                      dir -= 1
@@ -170,7 +173,7 @@ def handle_events():
                      stay_left=0
                      run_up_down_left=1
                      run_up_down_right=0
-                 
+
             elif event.key == SDLK_ESCAPE:
                 running = False
          elif event.type == SDL_KEYUP:
@@ -191,9 +194,9 @@ def handle_events():
                  run_up_down_left=0
                  run_up_down_right=0
               elif event.key == SDLK_UP:
-                  
+
                  if run_up_down_left==1:
-                    
+
                     dir =0
                     run_left=0
                     run_right=0
@@ -202,7 +205,7 @@ def handle_events():
                     run_up_down_left=0
                     run_up_down_right=0
                  elif run_up_down_right==1:
-                    
+
                     dir =0
                     run_left=0
                     run_right=0
@@ -210,12 +213,12 @@ def handle_events():
                     stay_left=0
                     run_up_down_left=0
                     run_up_down_right=0
-                    
+
               elif event.key == SDLK_DOWN:
-                  
+
                  if run_up_down_right==1:
-                    
-                    dir += 1
+
+                    dir =0
                     run_left=0
                     run_right=0
                     stay_right=1
@@ -223,37 +226,12 @@ def handle_events():
                     run_up_down_left=0
                     run_up_down_right=0
                  elif run_up_down_left==1:
-                    
-                    dir += 1
+
+                    dir =0
                     run_left=0
                     run_right=0
                     stay_right=0
                     stay_left=1
                     run_up_down_left=0
                     run_up_down_right=0
-                 
-                 
-
-
-open_canvas()
-KPU = load_image('TUK_GROUND.png')
-character = load_image('animation_sheet.png')
-
-running = True
-x = 800 // 2
-y=90
-frame = 0
-dir=0
-run_right=0
-run_left=0
-stay_right=1
-stay_left=0
-run_up_down_left=0
-run_up_down_right=0
-
-while running:
-    run()
-    handle_events()
-
-close_canvas()
 
