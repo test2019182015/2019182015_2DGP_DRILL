@@ -101,12 +101,16 @@ def run():
         stay_draw_left()
      if(run_up_down_left==1 and y>=0 and y<=600):
         run_draw_up_down_left()
-        if(y==0):
-            y+1
-        elif(y==600):
-            y-1
+     elif(y<0):
+         y=y+2
+     elif (y >600):
+         y = y - 2  
      if(run_up_down_right==1 and y>=0 and y<=600):
         run_draw_up_down_right()
+     elif(y<0):
+         y=y+2
+     elif (y >600):
+         y = y - 2  
 def handle_events():
      global running
      global dir
