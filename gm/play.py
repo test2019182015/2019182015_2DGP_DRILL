@@ -1,87 +1,101 @@
 import random
 from pico2d import *
 
-TUK_WIDTH, TUK_HEIGHT = 710, 896
+back_WIDTH, back_HEIGHT = 600, 600
 
 
 
 # 710, 896
+
+def draw_back():
+    clear_canvas()
+    TUK_ground.draw(back_WIDTH // 2, back_HEIGHT // 2)
+    grass.draw(350, 50)
+    update_canvas()
+
+
+def run_draw_move():
+    global y
+    global x
+    global frame
+    draw_back()
+    character.clip_draw(frame * 100, 100, 100, 100, x, y)
+    update_canvas()
+    handle_events()
+    x+=dir*5
+    frame = (frame + 1) % 8
+
+    delay(0.01)
+
+def stay_draw():
+     delay(1)
+def run_draw_up():
+    delay(1)
+def run():
+    if run_move==1:
+        run_draw_move()
+    elif run_jump==1:
+        run_draw_up()
+    elif stay_move==1:
+        stay_draw()
+
+
 def handle_events():
-    global running
-    global x, y
-    events = get_events()
-    for event in events:
-        if event.type == SDL_QUIT:
-            running = False
-        # elif event.type == SDL_MOUSEMOTION:
-        #     x, y = event.x, TUK_HEIGHT - 1 - event.y
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
-            running = False
-    pass
+     global running
+
+     events = get_events()
+     for event in events:
+         if event.type == SDL_QUIT:
+             running = False
+         elif event.type == SDL_KEYDOWN:
+            if event.key == SDLK_RIGHT:
+                run()
+            elif event.key == SDLK_LEFT:
+                run()
+            elif event.key == SDLK_UP:
+                run()
+            elif event.key == SDLK_ESCAPE:
+                running = False
+         elif event.type == SDL_KEYUP:
+              if event.key == SDLK_RIGHT:
+                  run()
+              elif event.key == SDLK_LEFT:
+                  run()
+              elif event.key == SDLK_UP:
+                  run()
 
 
 
 
-def reset_world():
-    global ax,ay
-    global t
-    global sx,sy
-
-    ax= (random.randint(0, TUK_WIDTH))
-    ay = (random.randint(0, TUK_HEIGHT))
-    t=0
-    sx,sy=x,y
-    pass
 
 
 
 
 
 
-open_canvas(TUK_WIDTH, TUK_HEIGHT)
+run_move=0
+stay_move=0
+run_jump=0
+move_dir=0
+jump_dir=0
+move_to=0
+jump_to=0
+open_canvas(back_WIDTH, back_HEIGHT)
 
-
+grass=load_image('grass1.png')
 TUK_ground = load_image('bg2.png')
 character = load_image('bosh.png')
-hand = load_image('hand_arrow.png')
 running = True
-sx, sy = TUK_WIDTH // 2, TUK_HEIGHT // 2
-x,y= sx,sy
-ax,ay=x,y
-frame = 0
-hide_cursor()
-arrive =True
-
-t=0
-def update_world():
-    global x,y
-    global t
-    t +=0.001
-    x= (1-t)*sx + t*ax
-    y = (1 - t) * sy + t * ay
-
-    if(t>=1.0):
-        reset_world()
-
-
-reset_world()
+frame=0
 while running:
-    update_world()
-
-    clear_canvas()
-    TUK_ground.draw(TUK_WIDTH // 2, TUK_HEIGHT // 2)
-    hand.draw_now(ax,ay)
-    # if(ax>=x):
-    #    character.clip_draw(frame * 100, 100 * 1, 100, 100, x, y)
-    # elif(ax<=x):
-    #     character.clip_draw(frame * 100, 0 * 1, 100, 100, x, y)
-    character.clip_draw(frame * 128, 1280, 128, 130, 400, 400, 30, 30)
+    draw_back()
+    character.clip_draw(frame * 128, 1152, 128, 130, 330, 125, 30, 30)
     #                      프레임      줄   크기   높이   x   y    w   h
     #줄 128의 배수
     update_canvas()
-    frame = (frame + 1) % 12
+    frame = (frame + 1) % 4
     handle_events()
-    delay(0.1)
+    delay(0.)
 
 close_canvas()
 
