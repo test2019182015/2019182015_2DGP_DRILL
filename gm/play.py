@@ -1,11 +1,11 @@
 import random
 from pico2d import *
 
-TUK_WIDTH, TUK_HEIGHT = 1280, 1024
+TUK_WIDTH, TUK_HEIGHT = 710, 896
 
 
 
-
+# 710, 896
 def handle_events():
     global running
     global x, y
@@ -42,7 +42,7 @@ open_canvas(TUK_WIDTH, TUK_HEIGHT)
 
 
 TUK_ground = load_image('bg2.png')
-character = load_image('animation_sheet.png')
+character = load_image('bosh.png')
 hand = load_image('hand_arrow.png')
 running = True
 sx, sy = TUK_WIDTH // 2, TUK_HEIGHT // 2
@@ -71,14 +71,17 @@ while running:
     clear_canvas()
     TUK_ground.draw(TUK_WIDTH // 2, TUK_HEIGHT // 2)
     hand.draw_now(ax,ay)
-    if(ax>=x):
-       character.clip_draw(frame * 100, 100 * 1, 100, 100, x, y)
-    elif(ax<=x):
-        character.clip_draw(frame * 100, 0 * 1, 100, 100, x, y)
-
+    # if(ax>=x):
+    #    character.clip_draw(frame * 100, 100 * 1, 100, 100, x, y)
+    # elif(ax<=x):
+    #     character.clip_draw(frame * 100, 0 * 1, 100, 100, x, y)
+    character.clip_draw(frame * 128, 1280, 128, 130, 400, 400, 30, 30)
+    #                      프레임      줄   크기   높이   x   y    w   h
+    #줄 128의 배수
     update_canvas()
-    frame = (frame + 1) % 8
+    frame = (frame + 1) % 12
     handle_events()
+    delay(0.1)
 
 close_canvas()
 
