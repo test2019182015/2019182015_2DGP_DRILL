@@ -52,7 +52,6 @@ def stay_draw():
         frame = 7
         character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
         update_canvas()
-        update_canvas()
     handle_events()
     delay(0.01)
 def run_draw_up():
@@ -70,7 +69,6 @@ def run_draw_up():
         elif move_to == 1:  # right run
             character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
             update_canvas()
-            update_canvas()
             frame = (frame + 1) % 6 + 6
 
     for boshy_ch.Y in range(boshy_ch.Y,boshy_ch.Y-100,-4):
@@ -85,11 +83,19 @@ def run_draw_up():
         elif move_to == 1:  # right run
             character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
             update_canvas()
-            update_canvas()
             frame = (frame + 1) % 6 + 6
 
     handle_events()
     delay(0.1)
+
+
+def shot():
+    draw_back()
+    bul.draw()
+    bul.update()
+    character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
+    update_canvas()
+    delay(0.01)
 def run():
     if run_move == 1:
         run_draw_move()
@@ -155,14 +161,23 @@ def handle_events():
 
 
 
+class bullet:
+    def __init__(self):
+        self.image = load_image('bullet.png')
+        self.Sh=0
 
+    def update(self):
+        if(self.Sh==50):
+            self.Sh=0
+        self.Sh+=2
+    def draw(self):
+        self.image.draw(boshy_ch.X+15+self.Sh,boshy_ch.Y,7,7)
 class boshy_ch:
     X: int = 30
     Y: int = 30
     move_to:int =0
 
 open_canvas(back_WIDTH, back_HEIGHT)
-
 grass=load_image('grass1.png')
 TUK_ground = load_image('bg2.png')
 
@@ -170,9 +185,10 @@ character = load_image('bosh.png')
 
 running = True
 frame=0
-
+bul=bullet()
 start_run()
 while running:
+    shot()
     run()
     handle_events()
 
