@@ -8,8 +8,13 @@ run_move=0
 stay_move=0
 run_jump=0
 move_dir=0
-move_to=0
+move_to=1
 jump_to=0
+jump_tr=2
+jump_up=5
+jump_now_x=0
+jump_now_y=0
+jump_sta=0
 # 710, 896
 
 def draw_back():
@@ -37,7 +42,6 @@ def run_draw_move():
         frame = (frame + 1) % 6+6
     handle_events()
 
-    delay(0.01)
 
 def stay_draw():
     global frame
@@ -53,49 +57,55 @@ def stay_draw():
         character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
         update_canvas()
     handle_events()
-    delay(0.01)
 def run_draw_up():
     print('jump')
     global frame
-    for boshy_ch.Y in range(boshy_ch.Y,boshy_ch.Y+100,4):
-        delay(0.01)
-        draw_back()
-        if move_to == 0:  # left run
-            character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
-            update_canvas()
-            frame = (frame + 1) % 6
-    #                      프레임      줄   크기   높이   x   y    w   h
-    # 줄 128의 배수
-        elif move_to == 1:  # right run
-            character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
-            update_canvas()
-            frame = (frame + 1) % 6 + 6
-
-    for boshy_ch.Y in range(boshy_ch.Y,boshy_ch.Y-100,-4):
-        delay(0.01)
-        draw_back()
-        if move_to == 0:  # left run
-            character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
-            update_canvas()
-            frame = (frame + 1) % 6
-    #                      프레임      줄   크기   높이   x   y    w   h
-    # 줄 128의 배수
-        elif move_to == 1:  # right run
-            character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
-            update_canvas()
-            frame = (frame + 1) % 6 + 6
-
+    global move_to
+    global jump_now_x
+    global jump_up
+    global jump_sta
+    global  jump_tr
     handle_events()
-    delay(0.1)
+    delay(0.01)
+    draw_back()
+    boshy_ch.Y = boshy_ch.Y + jump_up
+    if move_to == 0:  # left run
+        character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y+jump_up, 30, 30)
+        update_canvas()
+        frame = (frame + 1) % 6
+    #                      프레임      줄   크기   높이   x   y    w   h
+    # 줄 128의 배수
+    elif move_to == 1:  # right run
+        character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y+jump_up, 30, 30)
+
+        update_canvas()
+        frame = (frame + 1) % 6 + 6
+    print(boshy_ch.Y,jump_now_y)
+    if (boshy_ch.Y < jump_now_y + 200 and jump_sta==0):
+        print(1)
+        run_draw_up()
+    elif (boshy_ch.Y > jump_now_y):
+        print(2)
+        jump_sta = 1
+        jump_up=-5
+        run_draw_up()
+    elif boshy_ch.Y==jump_now_y:
+        print(3)
+        jump_up = 0
+        jump_sta = 2
+        jump_tr=2
+
 
 
 def shot():
     draw_back()
     bul.draw()
-    bul.update()
+    bul.shot()
     character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
+    handle_events()
     update_canvas()
-    delay(0.01)
+    if bul.Sh<=100:
+        shot()
 def run():
     if run_move == 1:
         run_draw_move()
@@ -110,6 +120,7 @@ def start_run():
     draw_back()
     frame = 7
     character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
+    handle_events()
     update_canvas()
 
 def handle_events():
@@ -119,6 +130,11 @@ def handle_events():
      global move_dir
      global stay_move
      global run_jump
+     global jump_tr
+     global jump_now_x
+     global jump_now_y
+     global jump_up
+     global jump_sta
      events = get_events()
      for event in events:
          if event.type == SDL_QUIT:
@@ -137,9 +153,18 @@ def handle_events():
                 move_dir -=1
                 run()
             if event.key == SDLK_UP:
-                stay_move = 0
-                run_jump=1
-                run()
+                if jump_tr>0:
+                    jump_up = 5
+                    jump_sta=0
+                    jump_tr-=1
+                    if(jump_tr==1):
+                        jump_now_y = boshy_ch.Y
+                    stay_move = 0
+                    run_jump=1
+                    run()
+            if event.key == SDLK_x:
+                shot()
+
             elif event.key == SDLK_ESCAPE:
                 running = False
          elif event.type == SDL_KEYUP:
@@ -155,8 +180,6 @@ def handle_events():
                   run()
               elif event.key == SDLK_UP:
                   run_jump = 0
-                  stay_move = 1
-
 
 
 
@@ -166,15 +189,19 @@ class bullet:
         self.image = load_image('bullet.png')
         self.Sh=0
 
-    def update(self):
-        if(self.Sh==50):
+    def shot(self):
+        if(self.Sh<=110):
+            self.Sh+=2
+        if(self.Sh>=110):
             self.Sh=0
-        self.Sh+=2
+        delay(0.01)
+
+
     def draw(self):
         self.image.draw(boshy_ch.X+15+self.Sh,boshy_ch.Y,7,7)
 class boshy_ch:
     X: int = 30
-    Y: int = 30
+    Y: int = 300
     move_to:int =0
 
 open_canvas(back_WIDTH, back_HEIGHT)
@@ -188,7 +215,6 @@ frame=0
 bul=bullet()
 start_run()
 while running:
-    shot()
     run()
     handle_events()
 
