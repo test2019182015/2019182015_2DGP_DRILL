@@ -12,7 +12,6 @@ move_to=1
 jump_to=0
 jump_tr=2
 jump_up=5
-jump_now_x=0
 jump_now_y1=0
 jump_now_y2=0
 jump_sta=0
@@ -36,7 +35,6 @@ def move_map():
         map_state = 1
         boshy_ch.X = 1090
 def run_draw_move():
-    print('move')
     global frame
     draw_back()
     if move_to == 0: #left run
@@ -75,46 +73,42 @@ def run_draw_up():
     global jump_up
     global jump_sta
     global jump_tr
+    global run_jump
     handle_events()
-    delay(0.01)
     draw_back()
     boshy_ch.Y = boshy_ch.Y + jump_up
-    if move_to == 0:  # left run
-        character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y+jump_up, 30, 30)
-        update_canvas()
-        frame = (frame + 1) % 6
+    print(jump_now_y2,boshy_ch.Y,jump_up)
+    if(boshy_ch.Y < jump_now_y1 + 200):
+        if move_to == 0:  # left run
+            character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y+jump_up, 30, 30)
+            update_canvas()
+            frame = (frame + 1) % 6
     #                      프레임      줄   크기   높이   x   y    w   h
     # 줄 128의 배수
-    elif move_to == 1:  # right run
-        character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y+jump_up, 30, 30)
-
-        update_canvas()
-        frame = (frame + 1) % 6 + 6
-    if (boshy_ch.Y < jump_now_y1 + 200 and jump_sta==0):
-        run_draw_up()
-    elif (boshy_ch.Y > jump_now_y2):
+        elif move_to == 1:  # right run
+            character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y+jump_up, 30, 30)
+            update_canvas()
+            frame = (frame + 1) % 6 + 6
+    elif boshy_ch.Y > jump_now_y1 + 200:
         jump_sta = 1
         jump_up=-5
-        run_draw_up()
-    elif boshy_ch.Y==jump_now_y2:
-         jump_tr=2
+    if boshy_ch.Y<=jump_now_y2:
+        jump_up = 0
+        jump_tr=2
+        run_jump = 0
+
 
 
 
 def shot():
-  while bul.Sh<=1900:
     bul.draw()
     bul.shot()
     character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
     update_canvas()
     handle_events()
-  if bul.Sh==1905:
-      bul.Sh=0
 def run():
     if run_move == 1:
         run_draw_move()
-    if run_jump == 1:
-        run_draw_up()
     if stay_move == 1:
         stay_draw()
 
@@ -159,16 +153,16 @@ def handle_events():
                 run()
             if event.key == SDLK_UP:
                 if jump_tr>0:
+
                     jump_up = 5
                     jump_sta=0
-                    jump_tr-=1
-                    print(jump_tr)
+                    jump_tr -= 1
                     jump_now_y1 = boshy_ch.Y
                     if jump_tr==1:
                         jump_now_y2=boshy_ch.Y
+                    print(jump_now_y2)
                     stay_move = 0
-                    run_jump=1
-                    run()
+                    run_jump=2
             if event.key == SDLK_x:
                 shot()
 
@@ -185,9 +179,6 @@ def handle_events():
                   run_move = 0
                   stay_move = 1
                   run()
-              elif event.key == SDLK_UP:
-                  run_jump = 0
-
 
 
 
@@ -195,15 +186,25 @@ class bullet:
     def __init__(self):
         self.image = load_image('bullet.png')
         self.Sh=0
+        self.st=1
+        self.shot_now_x=1
+        self.shot_now_y = 0
 
     def shot(self):
-        if(self.Sh<=2000):
-            self.Sh+=5
+        if self.st==1:
+            self.shot_now_x = boshy_ch.X
+            self.shot_now_y= boshy_ch.Y
+            self.st=0
+        if(self.Sh<=1000):
+            self.Sh+=3
+        if(self.Sh>=1000):
+            self.st =1
+            self.Sh = 0
 
 
     def draw(self):
         draw_back()
-        self.image.draw(boshy_ch.X+15+self.Sh,boshy_ch.Y,7,7)
+        self.image.draw(self.shot_now_x+15+self.Sh,self.shot_now_y,7,7)
         update_canvas()
 class boshy_ch:
     X: int = 30
@@ -226,7 +227,10 @@ start_run()
 while running:
     run()
     handle_events()
-    delay(0.03)
+    # delay(0.01)
+    if run_jump > 0 and jump_tr>=0:
+        run_draw_up()
+    shot()
 
 close_canvas()
 
