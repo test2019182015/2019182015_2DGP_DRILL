@@ -242,12 +242,14 @@ running = True
 x = 800 // 2
 frame = 0
 dir = 0
+tuk_ground=load_image('map_1.png')
+grass=load_image('bg2')
 while running:
-clear_canvas()
-grass.draw(400, 30)
-character.clip_draw(frame * 100, 0, 100, 100, x, 90)
-update_canvas()
-handle_events()
-frame = (frame + 1) % 8
-x += dir * 5
-delay(0.01)
+    clear_canvas()
+    grass.draw(400, 30)
+    character.clip_draw(frame * 100, 0, 100, 100, x, 90)
+    update_canvas()
+    handle_events()
+    frame = (frame + 1) % 8
+    x += dir * 5
+    delay(0.01)

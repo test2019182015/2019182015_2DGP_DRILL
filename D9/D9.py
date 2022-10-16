@@ -41,7 +41,7 @@ def reset_world():
 open_canvas(TUK_WIDTH, TUK_HEIGHT)
 
 
-TUK_ground = load_image('bg2.png')
+TUK_ground = load_image('map_1.png')
 character = load_image('animation_sheet.png')
 hand = load_image('hand_arrow.png')
 running = True

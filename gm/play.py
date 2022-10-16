@@ -3,7 +3,7 @@ from pico2d import *
 from dataclasses import dataclass
 
 back_WIDTH, back_HEIGHT = 600, 600
-
+map_state=1
 run_move=0
 stay_move=0
 run_jump=0
@@ -13,17 +13,28 @@ jump_to=0
 jump_tr=2
 jump_up=5
 jump_now_x=0
-jump_now_y=0
+jump_now_y1=0
+jump_now_y2=0
 jump_sta=0
 # 710, 896
 
 def draw_back():
     clear_canvas()
-    TUK_ground.draw(back_WIDTH // 2, back_HEIGHT // 2)
-    grass.draw(350, 50)
+    move_map()
+    if map_state==1:
+        map_1.draw(back_WIDTH // 2, back_HEIGHT // 2,2000,back_HEIGHT)
+    elif map_state==2:
+        map_2.draw(back_WIDTH // 2, back_HEIGHT // 2, 2000, back_HEIGHT)
+    grass.draw(550, 50,1100,200)
     update_canvas()
-
-
+def move_map():
+    global map_state
+    if (boshy_ch.X > 1100 and map_state == 1):
+        map_state = 2
+        boshy_ch.X = 10
+    if (boshy_ch.X < 0 and map_state == 2):
+        map_state = 1
+        boshy_ch.X = 1090
 def run_draw_move():
     print('move')
     global frame
@@ -58,13 +69,12 @@ def stay_draw():
         update_canvas()
     handle_events()
 def run_draw_up():
-    print('jump')
     global frame
     global move_to
     global jump_now_x
     global jump_up
     global jump_sta
-    global  jump_tr
+    global jump_tr
     handle_events()
     delay(0.01)
     draw_back()
@@ -80,32 +90,26 @@ def run_draw_up():
 
         update_canvas()
         frame = (frame + 1) % 6 + 6
-    print(boshy_ch.Y,jump_now_y)
-    if (boshy_ch.Y < jump_now_y + 200 and jump_sta==0):
-        print(1)
+    if (boshy_ch.Y < jump_now_y1 + 200 and jump_sta==0):
         run_draw_up()
-    elif (boshy_ch.Y > jump_now_y):
-        print(2)
+    elif (boshy_ch.Y > jump_now_y2):
         jump_sta = 1
         jump_up=-5
         run_draw_up()
-    elif boshy_ch.Y==jump_now_y:
-        print(3)
-        jump_up = 0
-        jump_sta = 2
-        jump_tr=2
+    elif boshy_ch.Y==jump_now_y2:
+         jump_tr=2
 
 
 
 def shot():
-    draw_back()
+  while bul.Sh<=1900:
     bul.draw()
     bul.shot()
     character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
-    handle_events()
     update_canvas()
-    if bul.Sh<=100:
-        shot()
+    handle_events()
+  if bul.Sh==1905:
+      bul.Sh=0
 def run():
     if run_move == 1:
         run_draw_move()
@@ -132,7 +136,8 @@ def handle_events():
      global run_jump
      global jump_tr
      global jump_now_x
-     global jump_now_y
+     global jump_now_y1
+     global jump_now_y2
      global jump_up
      global jump_sta
      events = get_events()
@@ -157,8 +162,10 @@ def handle_events():
                     jump_up = 5
                     jump_sta=0
                     jump_tr-=1
-                    if(jump_tr==1):
-                        jump_now_y = boshy_ch.Y
+                    print(jump_tr)
+                    jump_now_y1 = boshy_ch.Y
+                    if jump_tr==1:
+                        jump_now_y2=boshy_ch.Y
                     stay_move = 0
                     run_jump=1
                     run()
@@ -190,24 +197,26 @@ class bullet:
         self.Sh=0
 
     def shot(self):
-        if(self.Sh<=110):
-            self.Sh+=2
-        if(self.Sh>=110):
-            self.Sh=0
-        delay(0.01)
+        if(self.Sh<=2000):
+            self.Sh+=5
 
 
     def draw(self):
+        draw_back()
         self.image.draw(boshy_ch.X+15+self.Sh,boshy_ch.Y,7,7)
+        update_canvas()
 class boshy_ch:
     X: int = 30
-    Y: int = 300
+    Y: int = 160
     move_to:int =0
 
-open_canvas(back_WIDTH, back_HEIGHT)
+open_canvas(back_WIDTH+500, back_HEIGHT)
 grass=load_image('grass1.png')
-TUK_ground = load_image('bg2.png')
-
+map_1 = load_image('map_1.png')
+map_2 = load_image('map_2.png')
+map_3 = load_image('map_3.png')
+map_4 = load_image('map_4.png')
+map_5 = load_image('map_5.png')
 character = load_image('bosh.png')
 
 running = True
@@ -217,7 +226,6 @@ start_run()
 while running:
     run()
     handle_events()
-
     delay(0.03)
 
 close_canvas()
