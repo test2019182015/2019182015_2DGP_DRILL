@@ -22,8 +22,6 @@ class Boy:
         self.dir =1
         self.ball_image = load_image('ball21x21.png')
         self.big_ball_image = load_image('ball41x41.png')
-
-
         self.item = None
 
 
@@ -84,8 +82,7 @@ def exit():
 
 # 월드에 존재하는 객체들을 업데이트 한다
 def update():
-    print(num)
-    for boy in team:
+     for boy in team:
         boy.update()
     #grass는 업데이트가 필요없음
 
@@ -100,7 +97,7 @@ def draw():
 def draw_world():
     grass.draw()
     for boy in team:
-       boy.draw()
+        boy.draw()
 
 
 def pause():

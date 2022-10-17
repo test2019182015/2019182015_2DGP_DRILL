@@ -35,8 +35,6 @@ def handle_events():
             if event.key == SDLK_ESCAPE:
                 game_framework.pop_state()#이전상태인 플레이 스테이트로 복귀
             match event.key:
-                case pico2d.SDLK_ESCAPE:
-                    game_framework.pop_state()
                 case pico2d.SDLK_j:
                     play_state.num+=1
                     game_framework.pop_state()
