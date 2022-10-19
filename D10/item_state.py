@@ -6,7 +6,8 @@ import title_state
 import play_state
 # running=True
 image=None
-
+def pause():
+    pass
 def enter():
     global image
     image = load_image('item_select.png')

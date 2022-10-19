@@ -1,9 +1,11 @@
 import random
 from pico2d import *
-from dataclasses import dataclass
-import winsound
 import pygame
+import game_framework
+import title
 #import map_1_state
+running = True
+frame=0
 back_WIDTH, back_HEIGHT = 600, 600
 map_state=1
 run_move=None
@@ -22,6 +24,12 @@ save_map=1
 jump_sta=0
 map_4_save = 0
 ran_s=0
+boshy_X=50
+boshy_Y=50
+boshy_died=False
+magazine=None
+shot_on = 0
+bul=None
 pygame.mixer.init()
 # 710, 896
 
@@ -46,7 +54,7 @@ def map_fir_2_draw():
 
 def map_fir_3_draw():
     map_1.draw(back_WIDTH // 2, back_HEIGHT // 2, 2000, back_HEIGHT)
-    boshy_ch.y=380
+    boshy_Y=380
     up_block.draw(0, 380)
     up_block.draw(60, 380)
     up_block.draw(120, 380)
@@ -65,6 +73,8 @@ def map_fir_4_draw():
     global save_x
     global save_y
     global save_map
+    global boshy_X
+    global boshy_Y
     map_1.draw(back_WIDTH // 2, back_HEIGHT // 2, 2000, back_HEIGHT)
     up_block.draw(0, 380)
     up_block.draw(60, 380)
@@ -74,12 +84,13 @@ def map_fir_4_draw():
     up_block.draw(300, 320)
     up_block.draw(360, 320)
     if map_state==4:
-        if 860>bul.shot_now_x+bul.Sh>820and 480>bul.shot_now_y>400:
-            map_4_save=1
-            save_x = boshy_ch.X
-            save_y = boshy_ch.Y
-            save_map = map_state
-            print('save')
+        pass
+        # if 860>bul.shot_now_x+bul.Sh>820and 480>bul.shot_now_y>400:
+        #     map_4_save=1
+        #     save_x = boshy_X
+        #     save_y = boshy_Y
+        #     save_map = map_state
+        #     print('save')
     if map_4_save==0:
         No_save.draw(860,440,40,40)
     elif map_4_save==1:
@@ -90,21 +101,22 @@ def map_fir_4_draw():
     up_block.draw(980, 380)
     up_block.draw(1040, 380)
     up_block.draw(1100, 380)
-    if (boshy_ch.X==1200):
+    if (boshy_X==1200):
         died()
-        boshy_ch.X=1195
+        boshy_X=1195
 
 def died():
+    global boshy_died
     lol=0
     u=0
-    boshy_ch.state_die=1
+    boshy_died=True
     pygame.mixer.music.load('hit_snd.wav')
     pygame.mixer.music.play()
     delay(0.5)
     pygame.mixer.music.pause()
     pygame.mixer.music.load('loludied.mp3')
     pygame.mixer.music.play()
-    while boshy_ch.state_die==1:
+    while boshy_died==True:
         draw_back()
         gameOver.draw(500,300,400+lol,400+lol)
         handle_events()
@@ -122,11 +134,9 @@ def died():
 
 
 def draw_back():
-    clear_canvas()
     move_map()
     if map_state==1:
        map_fir_1_draw()
-       #map_1_state.map_fir_1_draw()
     elif map_state==2:
         map_fir_2_draw()
     elif map_state==3:
@@ -135,42 +145,46 @@ def draw_back():
         map_fir_4_draw()
 def move_map():
     global map_state
-    if (boshy_ch.X > 1100 and map_state == 1):
+    global boshy_X
+    global boshy_Y
+    if (boshy_X > 1100 and map_state == 1):
         map_state = 2
-        boshy_ch.X = 10
-        boshy_ch.y = 380
-    if (boshy_ch.X < 0 and map_state == 2):
+        boshy_X = 10
+        boshy_Y = 380
+    if (boshy_X < 0 and map_state == 2):
         map_state = 1
-        boshy_ch.X = 1090
-        boshy_ch.y = 380
-    if (boshy_ch.X > 1100 and map_state == 2):
+        boshy_X = 1090
+        boshy_Y = 380
+    if (boshy_X > 1100 and map_state == 2):
         map_state = 3
-        boshy_ch.X = 10
-    if (boshy_ch.X < 0 and map_state == 3):
+        boshy_X = 10
+    if (boshy_X < 0 and map_state == 3):
         map_state = 2
-        boshy_ch.X = 1090
-        boshy_ch.y = 380
-    if (boshy_ch.X > 1100 and map_state == 3):
+        boshy_X = 1090
+        boshy_Y = 380
+    if (boshy_X > 1100 and map_state == 3):
         map_state = 4
-        boshy_ch.X = 10
-    if (boshy_ch.X < 0 and map_state == 4):
+        boshy_X = 10
+    if (boshy_X < 0 and map_state == 4):
         map_state = 3
-        boshy_ch.X = 1090
+        boshy_X = 1090
 
 
 def run_draw_move():
     global frame
+    global boshy_X
+    global boshy_Y
     draw_back()
     if move_to == 0: #left run
-        character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
-        boshy_ch.X+=move_dir*7
+        character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y, 30, 30)
+        boshy_X+=move_dir*7
         update_canvas()
         frame = (frame + 1) % 6
     #                      프레임      줄   크기   높이   x   y    w   h
     # 줄 128의 배수
     elif move_to == 1: #right run
-        character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
-        boshy_ch.X += move_dir*7
+        character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y, 30, 30)
+        boshy_X += move_dir*7
         update_canvas()
         frame = (frame + 1) % 6+6
     handle_events()
@@ -178,245 +192,274 @@ def run_draw_move():
 
 def stay_draw():
     global frame
+    global boshy_X
+    global boshy_Y
     draw_back()
     if move_to == 0:  # left run
         frame = 1
-        character.clip_draw(frame * 128, 1280, 128, 130,boshy_ch.X, boshy_ch.Y, 30, 30)
+        character.clip_draw(frame * 128, 1280, 128, 130,boshy_X, boshy_Y, 30, 30)
         update_canvas()
     #                      프레임      줄   크기   높이   x   y    w   h
     # 줄 128의 배수
     elif move_to == 1:  # right run
         frame = 7
-        character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
+        character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y, 30, 30)
         update_canvas()
     handle_events()
 def run_draw_up():
     global frame
     global move_to
-    global jump_now_x
     global jump_up
     global jump_sta
     global jump_tr
     global run_jump
+    global boshy_X
+    global boshy_Y
     handle_events()
     draw_back()
-    boshy_ch.Y = boshy_ch.Y + jump_up
-    if(boshy_ch.Y < jump_now_y1 + 120):
+    boshy_Y = boshy_Y + jump_up
+    if(boshy_Y < jump_now_y1 + 120):
         if move_to == 0:  # left run
-            character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y+jump_up, 30, 30)
-            update_canvas()
+            character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y+jump_up, 30, 30)
             frame = (frame + 1) % 6
     #                      프레임      줄   크기   높이   x   y    w   h
     # 줄 128의 배수
         elif move_to == 1:  # right run
-            character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y+jump_up, 30, 30)
-            update_canvas()
+            character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y+jump_up, 30, 30)
             frame = (frame + 1) % 6 + 6
-    elif boshy_ch.Y > jump_now_y1 + 120:
+    elif boshy_Y > jump_now_y1 + 120:
         jump_sta = 1
         jump_up=-10
-    if boshy_ch.Y<=jump_now_y2:
+    if boshy_Y<=jump_now_y2:
         jump_up = 0
         jump_tr=2
         run_jump = 0
-
-
-
-
-def shot():
-    #pygame.mixer.music.load('boshyshoot_snd.wav')
-    #pygame.mixer.music.play()
-    if ballet !=None:
-        for bul in ballet:
-            bul.draw()
-            bul.shot()
-            character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
-            update_canvas()
-            handle_events()
 def run():
     if run_move == 1:
         run_draw_move()
     if stay_move == 1:
         stay_draw()
-
-
 def start_run():
-    global frame
+    global frame,magazine,shot_on,bul
+    global boshy_X
+    global boshy_Y
     draw_back()
     frame = 7
-    character.clip_draw(frame * 128, 1280, 128, 130, boshy_ch.X, boshy_ch.Y, 30, 30)
-    handle_events()
+    character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y, 30, 30)
+    bul = bullet()
     update_canvas()
-
-
-
 def handle_events():
      global running
-     global run_move
-     global move_to
-     global move_dir
-     global stay_move
-     global run_jump
-     global jump_tr
-     global jump_now_x
-     global jump_now_y1
-     global jump_now_y2
-     global jump_up
-     global jump_sta
-     global shot_on
-     global ballet
-     global save_x
-     global save_y
-     global save_map
-     global map_state
-     global ran_s
      events = get_events()
      for event in events:
          if event.type == SDL_QUIT:
              running = False
          elif event.type == SDL_KEYDOWN:
             if event.key == SDLK_RIGHT:
-                stay_move=0
-                run_move = 1
-                move_to = 1
-                move_dir +=1
-                run()
+                press_key_right()
             if event.key == SDLK_LEFT:
-                stay_move=0
-                run_move = 1
-                move_to=0
-                move_dir -=1
-                run()
+                press_key_left()
             if event.key == SDLK_UP:
-                if jump_tr>0:
-                    jump_up = 10
-                    jump_sta=0
-                    jump_tr -= 1
-                    jump_now_y1 = boshy_ch.Y
-                    if jump_tr==1:
-                        jump_now_y2=boshy_ch.Y
-                    stay_move = 0
-                    run_jump=2
+                press_key_up()
             if event.key == SDLK_x:
-                shot_on+=1
-                ballet = [bul for i in range(shot_on)]
+                prass_key_x()
             if event.key == SDLK_r:
-                boshy_ch.state_die=0
-                ran_s = random.randint(1, 6)
-                boshy_ch.X=save_x
-                boshy_ch.Y=save_y
-                map_state=save_map
-                pygame.mixer.music.pause()
-                pygame.mixer.music.load('its_snd.wav')
-                pygame.mixer.music.play()
-                delay(0.5)
-                print('load')
-                if ran_s==1:
-                    pygame.mixer.music.load('boshy4_snd.wav')
-                    pygame.mixer.music.play()
-                elif ran_s==2:
-                    pygame.mixer.music.load('boshy4_snd.wav')
-                    pygame.mixer.music.play()
-                elif ran_s==3:
-                    pygame.mixer.music.load('boshy4_snd.wav')
-                    pygame.mixer.music.play()
-                elif ran_s==4:
-                    pygame.mixer.music.load('boshy4_snd.wav')
-                    pygame.mixer.music.play()
-                elif ran_s==5:
-                    pygame.mixer.music.load('boshy4_snd.wav')
-                    pygame.mixer.music.play()
-                elif ran_s==6:
-                    pygame.mixer.music.load('boshy4_snd.wav')
-                    pygame.mixer.music.play()
-                delay(0.5)
-                #pygame.mixer.music.load('time_snd.wav')
-                #pygame.mixer.music.play()
-            if event.key == SDLK_z:
-                boshy_ch.state_die=1
-                died()
-
+                prass_key_r()
             elif event.key == SDLK_ESCAPE:
-                running = False
+                game_framework.change_state(title)
+                running=False
          elif event.type == SDL_KEYUP:
               if event.key == SDLK_RIGHT:
-                  move_dir -=1
-                  run_move = 0
-                  stay_move=1
-                  run()
+                  up_key_right()
               elif event.key == SDLK_LEFT:
-                  move_dir += 1
-                  run_move = 0
-                  stay_move = 1
-                  run()
+                  up_key_left()
 
+
+def press_key_right():
+    global stay_move, run_move, move_to, move_dir
+    stay_move = 0
+    run_move = 1
+    move_to = 1
+    move_dir += 1
+    run()
+
+
+def press_key_left():
+    global stay_move, run_move, move_to, move_dir
+    stay_move = 0
+    run_move = 1
+    move_to = 0
+    move_dir -= 1
+    run()
+
+
+def press_key_up():
+    global jump_up, jump_sta, jump_tr, jump_now_y1, jump_now_y2, stay_move, run_jump
+    if jump_tr > 0:
+        jump_up = 10
+        jump_sta = 0
+        jump_tr -= 1
+        jump_now_y1 = boshy_Y
+        if jump_tr == 1:
+            jump_now_y2 = boshy_Y
+        stay_move = 0
+        run_jump = 2
+
+
+def up_key_left():
+    global move_dir, run_move, stay_move
+    move_dir += 1
+    run_move = 0
+    stay_move = 1
+    run()
+
+
+def up_key_right():
+    global move_dir, run_move, stay_move
+    move_dir -= 1
+    run_move = 0
+    stay_move = 1
+    run()
+
+
+def prass_key_r():
+    global boshy_Y
+    global boshy_X
+    global ran_s, map_state
+    boshy_died=False
+    ran_s = random.randint(1, 6)
+    boshy_X = save_x
+    boshy_Y = save_y
+    map_state = save_map
+    pygame.mixer.music.pause()
+    pygame.mixer.music.load('its_snd.wav')
+    pygame.mixer.music.play()
+    delay(0.5)
+    print('load')
+    if ran_s == 1:
+        pygame.mixer.music.load('boshy4_snd.wav')
+        pygame.mixer.music.play()
+    elif ran_s == 2:
+        pygame.mixer.music.load('boshy4_snd.wav')
+        pygame.mixer.music.play()
+    elif ran_s == 3:
+        pygame.mixer.music.load('boshy4_snd.wav')
+        pygame.mixer.music.play()
+    elif ran_s == 4:
+        pygame.mixer.music.load('boshy4_snd.wav')
+        pygame.mixer.music.play()
+    elif ran_s == 5:
+        pygame.mixer.music.load('boshy4_snd.wav')
+        pygame.mixer.music.play()
+    elif ran_s == 6:
+        pygame.mixer.music.load('boshy4_snd.wav')
+        pygame.mixer.music.play()
+    delay(0.5)
+    # pygame.mixer.music.load('time_snd.wav')
+    # pygame.mixer.music.play()
+
+def prass_key_x():
+    global shot_on
+    global move_to
+    global magazine
+    shot_on+=1
+    magazine = [bullet() for i in range(shot_on)]
+    for bul in magazine:
+        bul.shot()
 
 class bullet:
     def __init__(self):
-        self.image = load_image('bullet.png')
-        self.Sh=0
-        self.st=1
-        self.shot_now_x=1
-        self.shot_now_y = 0
-        self.shot_move=0
+        self.image=load_image('bullet.png')
+        self.qwe=load_image('bullet.png')
+        self.X=boshy_X
+        self.Y=boshy_Y
+        self.range=None
+        self.dir=move_to
     def shot(self):
+        self.X = boshy_X
+        self.Y = random.randint(100,600)
+        self.dir = move_to
+        if move_to == 1:
+            self.range = boshy_X + 800
+        elif move_to == 0:
+            self.range = boshy_X - 800
+    def update(self):
         global shot_on
-        global ballet
-        if self.st==1:
-            self.shot_now_x = boshy_ch.X
-            self.shot_now_y = boshy_ch.Y
-            self.st-=1
-            self.shot_move=move_to
-        if(self.Sh<=1000 or self.Sh>=-1000):
-            if self.shot_move==0:
-                self.Sh -=15
-            elif self.shot_move==1:
-                self.Sh += 15
-        if(self.Sh>=1000 or self.Sh<=-1000):
-            self.st =1
-            self.Sh = 0
-            shot_on-=1
-            ballet = [bul for i in range(shot_on)]
-
-
+        if self.dir == 1:
+            self.X+=10
+            if self.X>=self.range:
+                self.X = 0
+                shot_on -= 1
+        elif self.dir ==0:
+            self.X-=10
+            if self.X<=self.range:
+                self.X = 0
+                shot_on -= 1
     def draw(self):
-        draw_back()
-        self.image.draw(self.shot_now_x+self.Sh,self.shot_now_y,7,7)
-        update_canvas()
-class boshy_ch:
-    X: int = 30
-    Y: int = 380
-    state_die=0
-    move_to:int =0
-open_canvas(back_WIDTH+500, back_HEIGHT)
-grass=load_image('grass1.png')
-map_1 = load_image('map_1.png')
-map_2 = load_image('map_2.png')
-map_3 = load_image('map_3.png')
-map_4 = load_image('map_4.png')
-map_5 = load_image('map_5.png')
-character = load_image('bosh.png')
-up_block=load_image('up_block.png')
-niddle= load_image('niddle_test.png')
-more_jump=load_image('more_jump.png')
-Yes_save=load_image('Yes_save.png')
-No_save=load_image('No_save.png')
-gameOver=load_image('GameOver.png')
+        self.image.draw(self.X, self.Y, 15, 15)
 
-running = True
-frame=0
-shot_on = 0
-start_run()
-bul = bullet()
-ballet=None
-while running:
+def shot():
+    for bul in magazine:
+        print(shot_on)
+        bul.draw()
+        bul.update()
+    pass
+
+def draw():
+    character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y, 30, 30)
     run()
-    handle_events()
     if run_jump > 0 and jump_tr>=0:
         run_draw_up()
-    shot()
-    delay(0.01)
-close_canvas()
+    if shot_on>0:
+        shot()
+def update():
+    pass
+
+def exit():
+    global grass,map_1,map_2,map_3,map_4,map_5,character,up_block,niddle,more_jump,Yes_save,No_save,gameOver
+    # del grass,map_1,map_2,map_3,map_4,map_5,character,up_block,niddle,more_jump,Yes_save,No_save,gameOver
+    pass
+
+grass=None
+map_1=None
+map_2=None
+map_3=None
+map_4=None
+map_5=None
+character=None
+up_block=None
+niddle=None
+more_jump=None
+Yes_save=None
+No_save=None
+gameOver=None
+def enter():
+    global grass, map_1, map_2, map_3, map_4, map_5, character, up_block, niddle, more_jump, Yes_save, No_save, gameOver
+    grass = load_image('grass1.png')
+    map_1 = load_image('map_1.png')
+    map_2 = load_image('map_2.png')
+    map_3 = load_image('map_3.png')
+    map_4 = load_image('map_4.png')
+    map_5 = load_image('map_5.png')
+    character = load_image('bosh.png')
+    up_block = load_image('up_block.png')
+    niddle = load_image('niddle_test.png')
+    more_jump = load_image('more_jump.png')
+    Yes_save = load_image('Yes_save.png')
+    No_save = load_image('No_save.png')
+    gameOver = load_image('GameOver.png')
+    start_run()
+
+
+# enter()
+# open_canvas(back_WIDTH+500, back_HEIGHT)
+# start_run()
+# while running:
+#     draw()
+#     handle_events()
+#     update_canvas()
+#     delay(0.01)
+# close_canvas()
 
 
 
