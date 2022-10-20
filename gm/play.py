@@ -3,7 +3,7 @@ from pico2d import *
 import pygame
 import game_framework
 import title
-#import map_1_state
+import map_1_state
 running = True
 frame=0
 back_WIDTH, back_HEIGHT = 600, 600
@@ -15,7 +15,7 @@ move_dir=0
 move_to=1
 jump_to=0
 jump_tr=2
-jump_up=10
+jump_up=1
 jump_now_y1=0
 jump_now_y2=0
 save_x=100
@@ -28,12 +28,19 @@ boshy_X=50
 boshy_Y=50
 boshy_died=False
 magazine=None
-shot_on = 0
 bul=None
+test=[False,False,False]
+shot_range=[None,None,None]
+shot_X=[None,None,None]
+shot_Y=[None,None,None]
+shot_to=[None,None,None]
+shot_on=0
 pygame.mixer.init()
 # 710, 896
 
 def map_fir_1_draw():
+    # map_1_state.map_fir_1_draw()
+    # update_canvas()
     map_1.draw(back_WIDTH // 2, back_HEIGHT // 2, 2000, back_HEIGHT)
     grass.draw(550, 0,1100,70)
 
@@ -101,10 +108,6 @@ def map_fir_4_draw():
     up_block.draw(980, 380)
     up_block.draw(1040, 380)
     up_block.draw(1100, 380)
-    if (boshy_X==1200):
-        died()
-        boshy_X=1195
-
 def died():
     global boshy_died
     lol=0
@@ -178,14 +181,14 @@ def run_draw_move():
     if move_to == 0: #left run
         character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y, 30, 30)
         boshy_X+=move_dir*7
-        update_canvas()
+
         frame = (frame + 1) % 6
     #                      프레임      줄   크기   높이   x   y    w   h
     # 줄 128의 배수
     elif move_to == 1: #right run
         character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y, 30, 30)
         boshy_X += move_dir*7
-        update_canvas()
+
         frame = (frame + 1) % 6+6
     handle_events()
 
@@ -215,38 +218,37 @@ def run_draw_up():
     global run_jump
     global boshy_X
     global boshy_Y
-    handle_events()
     draw_back()
+    handle_events()
     boshy_Y = boshy_Y + jump_up
     if(boshy_Y < jump_now_y1 + 120):
         if move_to == 0:  # left run
-            character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y+jump_up, 30, 30)
+            character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y, 30, 30)
             frame = (frame + 1) % 6
     #                      프레임      줄   크기   높이   x   y    w   h
     # 줄 128의 배수
         elif move_to == 1:  # right run
-            character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y+jump_up, 30, 30)
+            character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y, 30, 30)
             frame = (frame + 1) % 6 + 6
     elif boshy_Y > jump_now_y1 + 120:
-        jump_sta = 1
         jump_up=-10
     if boshy_Y<=jump_now_y2:
         jump_up = 0
         jump_tr=2
         run_jump = 0
+
 def run():
     if run_move == 1:
         run_draw_move()
     if stay_move == 1:
         stay_draw()
 def start_run():
-    global frame,magazine,shot_on,bul
+    global frame,magazine,shot_on
     global boshy_X
     global boshy_Y
     draw_back()
     frame = 7
     character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y, 30, 30)
-    bul = bullet()
     update_canvas()
 def handle_events():
      global running
@@ -296,14 +298,14 @@ def press_key_left():
 def press_key_up():
     global jump_up, jump_sta, jump_tr, jump_now_y1, jump_now_y2, stay_move, run_jump
     if jump_tr > 0:
+        if jump_tr == 2:
+            jump_now_y2 = boshy_Y
         jump_up = 10
         jump_sta = 0
         jump_tr -= 1
         jump_now_y1 = boshy_Y
-        if jump_tr == 1:
-            jump_now_y2 = boshy_Y
         stay_move = 0
-        run_jump = 2
+        run_jump = 1
 
 
 def up_key_left():
@@ -361,57 +363,58 @@ def prass_key_r():
 def prass_key_x():
     global shot_on
     global move_to
-    global magazine
     shot_on+=1
-    magazine = [bullet() for i in range(shot_on)]
-    for bul in magazine:
-        bul.shot()
+    shOt()
 
-class bullet:
-    def __init__(self):
-        self.image=load_image('bullet.png')
-        self.qwe=load_image('bullet.png')
-        self.X=boshy_X
-        self.Y=boshy_Y
-        self.range=None
-        self.dir=move_to
-    def shot(self):
-        self.X = boshy_X
-        self.Y = random.randint(100,600)
-        self.dir = move_to
-        if move_to == 1:
-            self.range = boshy_X + 800
-        elif move_to == 0:
-            self.range = boshy_X - 800
-    def update(self):
-        global shot_on
-        if self.dir == 1:
-            self.X+=10
-            if self.X>=self.range:
-                self.X = 0
-                shot_on -= 1
-        elif self.dir ==0:
-            self.X-=10
-            if self.X<=self.range:
-                self.X = 0
-                shot_on -= 1
-    def draw(self):
-        self.image.draw(self.X, self.Y, 15, 15)
+
+
+def shOt():
+    global test,shot_Y,shot_X,shot_to,shot_range
+    for i in range(0,3,1):
+        if(test[i]==False):
+            test[i]=True
+            shot_Y[i]=boshy_Y
+            shot_X[i]=boshy_X
+            if move_to==1:
+                shot_to[i]=move_to
+                shot_range[i]=shot_X[i]+800
+            elif move_to==0:
+                shot_to[i] = move_to
+                shot_range[i] = shot_X[i] - 800
+            break
+
 
 def shot():
-    for bul in magazine:
-        print(shot_on)
-        bul.draw()
-        bul.update()
-    pass
+    global test, shot_Y, shot_X, shot_to, shot_range
+    for i in range(0, 3, 1):
+        if (test[i] == True):
+            bullet.draw(shot_X[i],shot_Y[i],15,15)
+            if shot_to[i]==1:
+                shot_X[i]=shot_X[i]+10
+                if shot_X[i]>=shot_range[i]:
+                    test[i]=False
+                    shot_X[i]=None
+                    shot_Y[i]=None
+                    shot_to[i]=None
+                    shot_range[i]=None
+            elif shot_to[i]==0:
+                shot_X[i]=shot_X[i]-10
+                if shot_X[i]<=shot_range[i]:
+                    test[i]=False
+                    shot_X[i]=None
+                    shot_Y[i]=None
+                    shot_to[i]=None
+                    shot_range[i]=None
+
 
 def draw():
+    draw_back()
     character.clip_draw(frame * 128, 1280, 128, 130, boshy_X, boshy_Y, 30, 30)
     run()
     if run_jump > 0 and jump_tr>=0:
         run_draw_up()
-    if shot_on>0:
-        shot()
+    shot()
+    update_canvas()
 def update():
     pass
 
@@ -433,8 +436,9 @@ more_jump=None
 Yes_save=None
 No_save=None
 gameOver=None
+bullet=None
 def enter():
-    global grass, map_1, map_2, map_3, map_4, map_5, character, up_block, niddle, more_jump, Yes_save, No_save, gameOver
+    global grass, map_1, map_2, map_3, map_4, map_5, character, up_block, niddle, more_jump, Yes_save, No_save, gameOver,bullet
     grass = load_image('grass1.png')
     map_1 = load_image('map_1.png')
     map_2 = load_image('map_2.png')
@@ -448,8 +452,9 @@ def enter():
     Yes_save = load_image('Yes_save.png')
     No_save = load_image('No_save.png')
     gameOver = load_image('GameOver.png')
+    bullet=load_image('bullet.png')
     start_run()
-
+    map_1_state.enter()
 
 # enter()
 # open_canvas(back_WIDTH+500, back_HEIGHT)

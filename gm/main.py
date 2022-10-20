@@ -2,7 +2,7 @@ import pico2d
 import play
 import title
 #running =True
-states=[title,play]#모듈을 변수로
+states=[play]#모듈을 변수로
 
 pico2d.open_canvas(1100,600)
 
